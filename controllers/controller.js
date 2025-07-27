@@ -10,7 +10,7 @@ const controller = {
             })
         }
         catch (err) {
-            console.log(err)
+            //console.log(err)
             res.sendStatus(400)
         }
     },
@@ -23,7 +23,7 @@ const controller = {
             })
         }
         catch (err) {
-            console.log(err)
+            //console.log(err)
             res.sendStatus(400)
         }
     },
@@ -39,7 +39,23 @@ const controller = {
             console.log(err)
             res.sendStatus(400)
         }
-    }
+    },
+
+   
+    404: async(req, res) => {
+        try {
+            app.use((req, res, next) => {
+                res.status(404).render('404', { title: 'Page Not Found' });
+            });
+        }
+        catch (err) {
+            console.log(err)
+
+        }
+    },
+
+
+    
 }
 
 export default controller
