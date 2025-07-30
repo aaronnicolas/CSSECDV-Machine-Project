@@ -18,25 +18,37 @@ const authUtility = {
     },
 
     attemptAuth: async (req, res, next) => {
-        const queryParams = new URLSearchParams()
+        const { email, password, confirm_password } = req.body;
 
-        // Feedback message to failed authentication
-        queryParams.append('feedback', 'Incorrect username or password!')
-        const queryString = queryParams.toString()
+        // Validation: check required fields
+        if (!email || !password) {
+            return res.status(400).render('login', {
+            error: 'Email and password are required!'
+            });
+        }
 
-        /*
+        // Optional: if you're registering, confirm_password might be needed
+        if (confirm_password && password !== confirm_password) {
+            return res.status(400).render('register', {
+            error: 'Passwords do not match!'
+            });
+        }
+
+        console.log('Attempting to Authenticate!');
+
+        // Attach query feedback on failure
+        const queryParams = new URLSearchParams({
+            feedback: 'Incorrect username or password!'
+        }).toString();
+
+        // Correct passport usage with redirects
         passport.authenticate('local', {
-            success: '/',
-            fail: `/login?${queryString}`,
+            successRedirect: '/',
+            failureRedirect: `/login?${queryParams}`,
             failureFlash: true,
-        })(req, res, next)*/
-        console.log(`Attempting to Authenticate!`)
-        // callback to database
-        // check for auth
-        // hash and salt
-        // return query URL parameters
-        // if success, redirect accordingly
+        })(req, res, next);
     },
+
 
     logout: (req, res) => {
         // Basically just redirect to index

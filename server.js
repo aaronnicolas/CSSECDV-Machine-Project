@@ -51,7 +51,30 @@ app.set("views", "./views")
 
 // Connect router to server
 app.use(`/`, routes)
-app.use(express.static('public'));
+app.use(express.static('public'))
+
+
+// Missing Page handler
+app.use((req, res, next) => {
+    res.status(404).render("404", {
+        title: "Page Not Found",
+        layout: "error",
+    })
+})
+
+// Internal Server Error middleware
+app.use((err, req, res, next) => {
+    if (process.env.NODE_ENV === "dev") {
+        console.error(err.stack)
+    }
+    
+    res.status(500).render("500", {
+        title: "Internal Server Error 500",
+        layout: "error",
+    })
+})
+
+
 
 /***
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

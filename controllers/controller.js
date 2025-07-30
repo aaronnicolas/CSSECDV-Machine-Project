@@ -10,8 +10,7 @@ const controller = {
             })
         }
         catch (err) {
-            //console.log(err)
-            res.sendStatus(400)
+            next(err)
         }
     },
 
@@ -23,8 +22,7 @@ const controller = {
             })
         }
         catch (err) {
-            //console.log(err)
-            res.sendStatus(400)
+            next(err)
         }
     },
 
@@ -36,21 +34,29 @@ const controller = {
             })
         }
         catch (err) {
-            console.log(err)
-            res.sendStatus(400)
+            next(err)
+        }
+    },
+
+    // Info Page
+    info: async(req, res) => {
+        try {
+            res.render ('info', {
+
+            })
+        }
+        catch (err) {
+            next(err)
         }
     },
 
    
-    404: async(req, res) => {
+    test500: async(req, res, next) => {
         try {
-            app.use((req, res, next) => {
-                res.status(404).render('404', { title: 'Page Not Found' });
-            });
+            next(new Error('Something broke!'))
         }
         catch (err) {
-            console.log(err)
-
+            next(err)
         }
     },
 

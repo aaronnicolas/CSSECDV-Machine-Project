@@ -8,6 +8,8 @@ const router = Router ()
 router.get (`/`,            controller.home)
 router.get (`/login`,       controller.login)
 router.get (`/register`,    controller.register)
+router.get (`/info`,        controller.info)
+router.get (`/test`,        controller.test500)
 
 // POSTS
 router.post (`/login`,      authUtility.attemptAuth)
