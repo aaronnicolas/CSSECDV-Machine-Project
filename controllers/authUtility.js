@@ -20,14 +20,14 @@ const authUtility = {
     attemptAuth: async (req, res, next) => {
         const { email, password, confirm_password } = req.body;
 
-        // Validation: check required fields
+        // Logging in: check required fields
         if (!email || !password) {
             return res.status(400).render('login', {
             error: 'Email and password are required!'
             });
         }
 
-        // Optional: if you're registering, confirm_password might be needed
+        // Register: check passwords
         if (confirm_password && password !== confirm_password) {
             return res.status(400).render('register', {
             error: 'Passwords do not match!'
