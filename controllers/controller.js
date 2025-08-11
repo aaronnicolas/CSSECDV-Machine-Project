@@ -93,6 +93,38 @@ const controller = {
         }
     },
 
+    star_sentinel: async(req, res, next) => {
+        try {
+            res.render('star_sentinel', {
+                layout: 'admin',
+                moderatorName: 'Luna Stern',
+                widgets: [
+                    {
+                    title: '🔭 My Observations',
+                    description: 'Track and manage your own observation logs.',
+                    labels: ['Jan', 'Feb', 'Mar'],
+                    data: [2, 5, 3]
+                    },
+                    {
+                    title: '👥 User Moderation',
+                    description: 'Review and take action on flagged users.',
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                    data: [3, 5, 1, 2, 4]
+                    },
+                    {
+                    title: '🔍 Observation Review',
+                    description: 'Approve, reject, or edit incoming observation reports.',
+                    labels: ['Week 1', 'Week 2', 'Week 3'],
+                    data: [10, 15, 8]
+                    }
+                ]
+            })
+        }
+        catch (err) {
+            next(err)
+        }
+    },
+
    
     test500: async(req, res, next) => {
         try {

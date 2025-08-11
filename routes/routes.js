@@ -11,6 +11,7 @@ router.get (`/register`,    controller.register)
 router.get (`/info`,        controller.info)
 router.get (`/test`,        controller.test500)
 router.get (`/star_admin`,  controller.star_admin)
+router.get (`/star_sentinel`, controller.star_sentinel)
 
 // POSTS
 router.post (`/login`,      authUtility.attemptAuth)
