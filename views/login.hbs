@@ -10,6 +10,12 @@
       </div>
     {{/if}}
 
+    {{#if success}}
+      <div class="alert alert-success text-center">
+        {{success}}
+      </div>
+    {{/if}}
+
     <form action="/login" method="POST">
       <div class="mb-3">
         <label for="username" class="form-label text-white">Username</label>

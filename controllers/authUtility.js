@@ -1,5 +1,7 @@
 import bcrypt from 'bcrypt'
 import passport from 'passport'
+import passwordValidator from '../utils/passwordValidator.js'
+import { User } from '../model/userSchema.js'
 
 const authUtility = {
 
@@ -18,12 +20,12 @@ const authUtility = {
     },
 
     attemptAuth: async (req, res, next) => {
-        const { email, password, confirm_password } = req.body;
+        const { username, password, confirm_password } = req.body;
 
         // Logging in: check required fields
-        if (!email || !password) {
+        if (!username || !password) {
             return res.status(400).render('login', {
-            error: 'Email and password are required!'
+            error: 'Invalid username and/or password'
             });
         }
 
@@ -38,7 +40,7 @@ const authUtility = {
 
         // Attach query feedback on failure
         const queryParams = new URLSearchParams({
-            feedback: 'Incorrect username or password!'
+            feedback: 'Invalid username and/or password'
         }).toString();
 
         // Correct passport usage with redirects
@@ -76,6 +78,75 @@ const authUtility = {
             else {
                 res.render('register', {layout: 'logregTemplate'})
             }
+        }
+    },
+
+    register: async (req, res) => {
+        try {
+            const { username, email, password, confirm_password } = req.body;
+
+            // Check required fields
+            if (!username || !email || !password) {
+                return res.status(400).render('register', {
+                    error: 'All fields are required!'
+                });
+            }
+
+            // Check password confirmation
+            if (confirm_password && password !== confirm_password) {
+                return res.status(400).render('register', {
+                    error: 'Passwords do not match!'
+                });
+            }
+
+            // Validate password complexity
+            const passwordValidation = passwordValidator.validate(password);
+            if (!passwordValidation.isValid) {
+                return res.status(400).render('register', {
+                    error: passwordValidation.errors.join(', ')
+                });
+            }
+
+            // Check if user already exists
+            const existingUser = await User.findOne({ 
+                $or: [{ username }, { email }] 
+            });
+            
+            if (existingUser) {
+                return res.status(400).render('register', {
+                    error: 'Username or email already exists!'
+                });
+            }
+
+            // Generate salt and hash password
+            const saltRounds = 12;
+            const salt = await bcrypt.genSalt(saltRounds);
+            const hashedPassword = await bcrypt.hash(password, salt);
+
+            // Create new user
+            const newUser = new User({
+                username,
+                email,
+                password: hashedPassword,
+                salt,
+                role: 0,
+                locked: 0
+            });
+
+            await newUser.save();
+
+            // Redirect to login with success message
+            const queryParams = new URLSearchParams({
+                message: 'Registration successful! Please log in.'
+            }).toString();
+            
+            res.redirect(`/login?${queryParams}`);
+
+        } catch (err) {
+            console.error('Registration error:', err);
+            res.status(500).render('register', {
+                error: 'An error occurred during registration. Please try again.'
+            });
         }
     }
 }

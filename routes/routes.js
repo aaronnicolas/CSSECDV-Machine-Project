@@ -15,5 +15,6 @@ router.get (`/star_sentinel`, controller.star_sentinel)
 
 // POSTS
 router.post (`/login`,      authUtility.attemptAuth)
+router.post (`/register`,   authUtility.register)
 
 export default router

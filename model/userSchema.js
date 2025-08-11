@@ -10,6 +10,11 @@ const Schema = mongoose.Schema
 
 const userSchema = new Schema ({
     username: String,       // have a name
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
     role: Number,          // role identifier for certain access
     locked: Number,        // locking users for a certain amount of time? maybe this should be a clock idk
     
