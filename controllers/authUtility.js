@@ -25,7 +25,7 @@ const authUtility = {
         // Logging in: check required fields
         if (!username || !password) {
             return res.status(400).render('login', {
-            error: 'Authentication failed. Please check your credentials.'
+            error: 'Invalid username and/or password'
             });
         }
 
@@ -40,7 +40,7 @@ const authUtility = {
 
         // Attach query feedback on failure
         const queryParams = new URLSearchParams({
-            feedback: 'Authentication failed. Please check your credentials.'
+            feedback: 'Invalid username and/or password'
         }).toString();
 
         // Correct passport usage with redirects
