@@ -1,0 +1,28 @@
+{{!> header}}
+
+<section class="container my-5" style="max-width: 800px;">
+  <h1 class="mb-4 text-light">🌟 Hello, <span class="text-warning">{{userName}}</span></h1>
+
+  <nav class="mb-4">
+    <ul class="nav nav-pills gap-2">
+      <li class="nav-item">
+        <a class="nav-link" href="/user/profile">✏️ Edit Profile</a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="row g-4">
+    {{#each widgets}}
+      <div class="col-12 col-md-6">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">
+                <a href="{{link}}" class="link-underline-light text-info">{{title}}</a></h5>
+            <p class="card-text">{{description}}</p>
+            <canvas id="chart-{{@index}}" height="100"></canvas>
+          </div>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+</section>

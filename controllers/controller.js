@@ -126,6 +126,32 @@ const controller = {
         }
     },
 
+    user_dashboard: async(req, res, next) => {
+        try {
+            res.render('user_dashboard', {
+                layout: 'admin',
+                userName: 'Nova Skye',
+                widgets: [
+                    {
+                    title: '🔭My Observations',
+                    description: 'Track and manage your own observation logs.',
+                    labels: ['Jan', 'Feb', 'Mar'],
+                    data: [2, 5, 3]
+                    },
+                    {
+                    title: '✨Profile Activity',
+                    description: 'View recent updates to your account.',
+                    labels: ['Week 1', 'Week 2', 'Week 3'],
+                    data: [1, 2, 2]
+                    }
+                ]
+            })
+        }
+        catch (err) {
+            next(err)
+        }
+    },
+
    
     test500: async(req, res, next) => {
         try {

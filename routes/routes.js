@@ -12,6 +12,7 @@ router.get (`/info`,        controller.info)
 router.get (`/test`,        controller.test500)
 router.get (`/star_admin`,  controller.star_admin)
 router.get (`/star_sentinel`, controller.star_sentinel)
+router.get (`/user_dashboard`, controller.user_dashboard)
 
 // POSTS
 router.post (`/login`,      authUtility.attemptAuth)
