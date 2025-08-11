@@ -37,12 +37,16 @@ dotenv.config()
 
 // Define server object and port
 const app   = express()
-const port  = process.env.PORT
+const port  = process.env.PORT || 3000
 
 // Register hbs definition with Express
 app.engine("hbs", exphbs.engine({
     extname: 'hbs',
-    defaultLayout: 'main'
+    defaultLayout: 'main',
+    helpers: {
+      gt: (a, b) => Number(a) > Number(b),
+      json: (context) => JSON.stringify(context, null, 2)
+    }
 }))
 
 // Set the template rendering engine
@@ -156,3 +160,5 @@ connectDB()
 app.listen(port, () => {
     console.log(`Server running at 127.0.0.1:${port}`)
 })
+
+
