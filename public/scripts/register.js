@@ -1,464 +1,201 @@
-document.addEventListener("DOMContentLoaded",function() {
-    const formElement = document.forms.login;
-    let formData = new FormData(formElement);
-    const owner = "owner";
-    const customer = "customer";
-    
-    let dropdown = document.querySelector("#usertype");
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const strengthBar = document.getElementById('password-strength-bar');
+    const strengthText = document.getElementById('password-strength-text');
+    const matchIndicator = document.getElementById('password-match-indicator');
+    const matchText = document.getElementById('password-match-text');
+    const registerBtn = document.getElementById('register-btn');
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const usertypeparam = urlParams.get('usertype');
-    const message = urlParams.get('message');
+    // Password requirement elements
+    const reqLength = document.getElementById('req-length');
+    const reqUpper = document.getElementById('req-upper');
+    const reqLower = document.getElementById('req-lower');
+    const reqNumber = document.getElementById('req-number');
+    const reqSpecial = document.getElementById('req-special');
 
-    if(usertypeparam){
-        dropdown.value = decodeURIComponent(usertypeparam);
+    // Common weak passwords
+    const commonPasswords = [
+        'password', 'password123', '123456', '123456789', 'qwerty', 
+        'abc123', 'password1', 'admin', 'letmein', 'welcome',
+        'monkey', '1234567890', 'dragon', 'master', 'shadow',
+        'sunshine', 'football', 'iloveyou', 'princess', 'rockyou'
+    ];
+
+    // Password validation function
+    function validatePassword(password) {
+        const requirements = {
+            length: password.length >= 8,
+            upper: /[A-Z]/.test(password),
+            lower: /[a-z]/.test(password),
+            number: /\d/.test(password),
+            special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+
+        const isCommon = commonPasswords.includes(password.toLowerCase());
+        const hasRepeating = /(.)\1{2,}/.test(password);
+
+        return {
+            requirements,
+            isValid: Object.values(requirements).every(req => req) && !isCommon && !hasRepeating,
+            isCommon,
+            hasRepeating
+        };
     }
-    if(dropdown.value == customer){
-        displayCustomerRegistration();
 
-        console.log(urlParams.entries());
-        for (const [name, value] of urlParams.entries()) {
-            console.log(`${name}: ${value}`);
-            if (name !== 'message' && name !== 'email' && name !== 'password' && name !== 'confirmpassword') {
-                const input = document.querySelector(`[name="${name}"]`);
-                if (input) {
-                
-                    input.value = decodeURIComponent(value);
-                
-                }
-            }
+    // Update password strength indicator
+    function updatePasswordStrength(password) {
+        if (!password) {
+            strengthBar.style.width = '0%';
+            strengthBar.className = 'progress-bar bg-danger';
+            strengthText.textContent = 'Weak';
+            return;
         }
-        if (message) {
-            emaillabel.innerHTML = `Email <span style='color:red; font:italic 15px Arial, sans-serif '>${decodeURIComponent(message)}</span>`;
 
+        let score = 0;
+        
+        if (password.length >= 8) score++;
+        if (password.length >= 12) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[a-z]/.test(password)) score++;
+        if (/\d/.test(password)) score++;
+        if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
+        if (password.length >= 16) score++;
+        
+        // Penalize common patterns
+        if (commonPasswords.includes(password.toLowerCase())) score = Math.max(0, score - 2);
+        if (/(.)\1{2,}/.test(password)) score = Math.max(0, score - 1);
+
+        const maxScore = 5;
+        const percentage = Math.min((score / maxScore) * 100, 100);
+        
+        strengthBar.style.width = percentage + '%';
+        
+        if (score <= 2) {
+            strengthBar.className = 'progress-bar bg-danger';
+            strengthText.textContent = 'Weak';
+        } else if (score <= 3) {
+            strengthBar.className = 'progress-bar bg-warning';
+            strengthText.textContent = 'Fair';
+        } else if (score <= 4) {
+            strengthBar.className = 'progress-bar bg-info';
+            strengthText.textContent = 'Good';
+        } else {
+            strengthBar.className = 'progress-bar bg-success';
+            strengthText.textContent = 'Strong';
+        }
+    }
+
+    // Update requirement indicators
+    function updateRequirements(validation) {
+        updateRequirement(reqLength, validation.requirements.length);
+        updateRequirement(reqUpper, validation.requirements.upper);
+        updateRequirement(reqLower, validation.requirements.lower);
+        updateRequirement(reqNumber, validation.requirements.number);
+        updateRequirement(reqSpecial, validation.requirements.special);
+    }
+
+    function updateRequirement(element, met) {
+        const icon = element.querySelector('.req-icon');
+        if (met) {
+            icon.textContent = '✓';
+            icon.className = 'req-icon text-success';
+        } else {
+            icon.textContent = '✗';
+            icon.className = 'req-icon text-danger';
+        }
+    }
+
+    // Check password match
+    function checkPasswordMatch() {
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (confirmPassword === '') {
+            matchIndicator.style.display = 'none';
+            return true;
+        }
+
+        matchIndicator.style.display = 'block';
+        
+        if (password === confirmPassword) {
+            matchText.textContent = 'Passwords match ✓';
+            matchText.className = 'text-success';
+            return true;
+        } else {
+            matchText.textContent = 'Passwords do not match ✗';
+            matchText.className = 'text-danger';
+            return false;
+        }
+    }
+
+    // Update submit button state
+    function updateSubmitButton() {
+        const passwordValidation = validatePassword(passwordInput.value);
+        const passwordsMatch = checkPasswordMatch();
+        const allFieldsFilled = document.getElementById('username').value && 
+                               document.getElementById('email').value && 
+                               passwordInput.value && 
+                               confirmPasswordInput.value;
+
+        if (passwordValidation.isValid && passwordsMatch && allFieldsFilled) {
+            registerBtn.disabled = false;
+            registerBtn.style.opacity = '1';
+        } else {
+            registerBtn.disabled = true;
+            registerBtn.style.opacity = '0.6';
+        }
+    }
+
+    // Password input event handler
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        const validation = validatePassword(password);
+        
+        updatePasswordStrength(password);
+        updateRequirements(validation);
+        checkPasswordMatch();
+        updateSubmitButton();
+    });
+
+    // Confirm password input event handler
+    confirmPasswordInput.addEventListener('input', function() {
+        checkPasswordMatch();
+        updateSubmitButton();
+    });
+
+    // Other field change handlers
+    document.getElementById('username').addEventListener('input', updateSubmitButton);
+    document.getElementById('email').addEventListener('input', updateSubmitButton);
+
+    // Form submission handler
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const passwordValidation = validatePassword(passwordInput.value);
+        const passwordsMatch = checkPasswordMatch();
+
+        if (!passwordValidation.isValid) {
+            e.preventDefault();
             
+            let errorMessage = 'Password does not meet requirements:\n';
+            if (!passwordValidation.requirements.length) errorMessage += '• Must be at least 8 characters long\n';
+            if (!passwordValidation.requirements.upper) errorMessage += '• Must contain uppercase letter\n';
+            if (!passwordValidation.requirements.lower) errorMessage += '• Must contain lowercase letter\n';
+            if (!passwordValidation.requirements.number) errorMessage += '• Must contain number\n';
+            if (!passwordValidation.requirements.special) errorMessage += '• Must contain special character\n';
+            if (passwordValidation.isCommon) errorMessage += '• Password is too common\n';
+            if (passwordValidation.hasRepeating) errorMessage += '• Cannot contain more than 2 consecutive identical characters\n';
+            
+            alert(errorMessage);
+            return false;
         }
-    }
-    else if(dropdown.value == owner){
-        displayOwnerRegistration();
-        // Populate form inputs with existing values
-        console.log(urlParams.entries());
-        for (const [name, value] of urlParams.entries()) {
-            console.log(`${name}: ${value}`);
-            if (name !== 'message' && name !== 'email' && name !== 'password' && name !== 'confirmpassword') {
-                const input = document.querySelector(`[name="${name}"]`);
-                if (input) {
-                
-                    input.value = decodeURIComponent(value);
-                
-                }
-            }
+
+        if (!passwordsMatch) {
+            e.preventDefault();
+            alert('Passwords do not match!');
+            return false;
         }
-        if (message) {
-            emaillabel.innerHTML = `Email <span style='color:red; font:italic 15px Arial, sans-serif '>${decodeURIComponent(message)}</span>`;
-          }
+    });
 
-        
-    }
-
-    dropdown.addEventListener("change", function() {
-        let usertype = dropdown.value;
-        clearForm();
-        changeForm(usertype);
-        console.log(usertype);
-    })
-
-    function changeForm(usertype){
-        if(usertype == customer){
-            clearForm();
-            displayCustomerRegistration();
-            document.querySelector("#profilepic").addEventListener("change", function() {
-                readURL(this);
-            });
-        }
-        else if(usertype == owner){
-            clearForm();
-            displayOwnerRegistration();
-        }
-    }
-
-    function readURL(input) {
-        if (input.files && input.files[0]) {
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            $('#profilepicimg').attr('src', e.target.result);
-          }
-          reader.readAsDataURL(input.files[0]);
-        } 
-        else {
-          alert('select a file to see preview');
-          $('#profilepicimg').attr('src', '/images/assets/2logo.png');
-        }
-      }
-
-    function clearForm(){
-        document.querySelector("#inputform").innerHTML = "";
-    }
-
-    function displayCustomerRegistration(){
-
-        const form = document.querySelector("#inputform");
-        //const profilepic = createProfilePicInput();
-        //const bio = createBioInput();
-        const namefield = createNameInputs();
-        //const bdayfield = createBirthdayInputs();
-        const email = createEmailInput();
-        const pass = createPasswordInput();
-        const confirm = createConfirmPasswordInput();
-        const submit = createSubmitbutton();
-
-        // form.appendChild(profilepic);
-        // form.appendChild(bio);
-        form.appendChild(namefield);
-        //form.appendChild(bdayfield);
-        form.appendChild(email);
-        form.appendChild(pass);
-        form.appendChild(confirm);
-        form.appendChild(submit);
-    }
-
-    function displayOwnerRegistration(){
-        const form = document.querySelector("#inputform");
-        const email = createEmailInput();
-        const pass = createPasswordInput();
-        const confirm = createConfirmPasswordInput();
-        const submit = createSubmitbutton();
-        const estname = createLongTextBoxInput();
-
-        estname.childNodes[1].setAttribute("placeholder","cafebara");
-        estname.childNodes[1].setAttribute("name", "estname");
-        estname.childNodes[1].required = true;
-        estname.childNodes[0].innerHTML = "Establishment Name";
-
-        const estaddress = createLongTextBoxInput();
-        estaddress.childNodes[1].setAttribute("placeholder","2401 Taft Ave, Malate, Manila");
-        estaddress.childNodes[1].setAttribute("name", "estaddress");
-        estaddress.childNodes[1].required = true;
-        estaddress.childNodes[0].innerHTML = "Establishment Address";
-    
-        form.appendChild(estname);
-        form.appendChild(estaddress);
-        form.appendChild(email);
-        form.appendChild(pass);
-        form.appendChild(confirm);
-        form.appendChild(submit);
-
-    }
-
-    function createLongTextBoxInput(){
-        const div = document.createElement("div");
-        const label = document.createElement("label");
-        const input = document.createElement("input");
-
-        div.setAttribute("class","singlebox");
-        input.setAttribute("type","text");
-        div.appendChild(label);
-        div.appendChild(input);
-
-        return div;
-    }
-
-    function createSubmitbutton(){
-        const button = document.createElement("input");
-        const div = document.createElement("div");
-        const anchortag = document.createElement("a");
-        
-        //anchortag.setAttribute("href","index2.html");
-        button.setAttribute("type","submit");
-        button.setAttribute("id","submit");
-        button.setAttribute("name","submit");
-        // set attribute "method" = lowercase post
-        button.setAttribute("method","post");
-        button.innerHTML = "Sign up";
-
-        anchortag.appendChild(button);
-        div.appendChild(anchortag);
-        div.setAttribute("id","button");
-        return div;
-    }
-
-    function createConfirmPasswordInput(){
-        const pass = document.createElement("input");
-        const passdiv = document.createElement("div");
-        const passlabel = document.createElement("label");
-
-        pass.setAttribute("type","password");
-        pass.setAttribute("name","confirmpassword");
-        pass.setAttribute("id","confirmpassword");
-        pass.setAttribute("placeholder","Re-enter your password");
-        pass.required = true;
-
-        passlabel.setAttribute("for","confirmpassword");
-        passlabel.innerHTML = "Confirm Password";
-
-        passdiv.setAttribute("class","singlebox");
-
-        passdiv.appendChild(passlabel);
-        passdiv.appendChild(pass);
-
-        return passdiv;
-    }
-
-    function createPasswordInput(){
-        const pass = document.createElement("input");
-        const passdiv = document.createElement("div");
-        const passlabel = document.createElement("label");
-
-        pass.setAttribute("type","password");
-        pass.setAttribute("name","password");
-        pass.setAttribute("id","password");
-        pass.setAttribute("placeholder","password12345");
-        pass.required = true;
-
-        passlabel.setAttribute("for","password");
-        passlabel.innerHTML = "Password";
-
-        passdiv.setAttribute("class","singlebox");
-
-        passdiv.appendChild(passlabel);
-        passdiv.appendChild(pass);
-
-        return passdiv;
-    }
-
-    function createEmailInput(){
-        const email = document.createElement("input");        
-        const emaildiv = document.createElement("div");
-        const emaillabel = document.createElement("label");
-
-        email.setAttribute("type","email");
-        email.setAttribute("name","email");
-        email.setAttribute("id","email");
-        email.setAttribute("placeholder","kk@email.com");
-        email.required = true;
-  
-        emaillabel.setAttribute("for","email");
-        emaillabel.setAttribute("id", "emaillabel");
-        emaillabel.innerHTML = "Email";
-        emaildiv.setAttribute("class","singlebox");
-
-        emaildiv.appendChild(emaillabel);
-        emaildiv.appendChild(email);
-
-        return emaildiv;
-    }
-
-    // // function createBirthdayInputs(){
-    // //     const bdaywrap = document.createElement("div");
-    // //     const firstdiv = document.createElement("div");
-    // //     const seconddiv = document.createElement("div");
-    // //     const daydiv = document.createElement("div");
-    // //     const monthdiv = document.createElement("div");
-    // //     const yeardiv = document.createElement("div");
-    // //     $(bdaywrap).addClass("longbox");
-    // //     $(seconddiv).addClass("tripleboxwrapper");
-    // //     $(daydiv).addClass("tripleboxlayer");
-    // //     $(monthdiv).addClass("tripleboxlayer");
-    // //     $(yeardiv).addClass("tripleboxlayer");
-
-    // //     const bdaytag = document.createElement("label");
-    // //     bdaytag.innerHTML = "When is your birthday?";
-    // //     firstdiv.appendChild(bdaytag);
-
-    // //     daydiv.setAttribute("id","daydiv");
-    // //     monthdiv.setAttribute("id","monthdiv");
-    // //     yeardiv.setAttribute("id","yeardiv");
-
-    // //     const month = document.createElement("select");
-    // //     const day = document.createElement("input");
-    // //     const year = document.createElement("input");
-
-    // //     const monthlabel = document.createElement("label");
-    // //     const daylabel = document.createElement("label");
-    // //     const yearlabel = document.createElement("label");
-
-    // //     monthlabel.innerHTML = "Month";
-    // //     daylabel.innerHTML = "Day";
-    // //     yearlabel.innerHTML = "Year";
-
-    // //     //This part creates the month option elements and adds to the select
-    // //     const months = createBirthMonths();
-    // //     for(let i = 0; i < months.length; i++){
-    // //         month.appendChild(months[i]);
-    // //     };
-        
-    // //     day.setAttribute("type","number");
-    // //     day.setAttribute("id","day");
-    // //     day.setAttribute("min","1");
-    // //     day.setAttribute("max","31");
-    // //     day.setAttribute("placeholder","DD");
-    // //     day.required = true;
-        
-    // //     month.setAttribute("class","inputfield");
-    // //     month.required = true;
-        
-    // //     year.setAttribute("placeholder","YYYY");
-    // //     year.required = true;
-        
-    // //     const date = new Date();
-    // //     const currentyear = date.getFullYear();
-    // //     year.setAttribute("type","number");
-    // //     year.setAttribute("min", currentyear-120);
-    // //     year.setAttribute("max", currentyear);
-
-    // //     daydiv.appendChild(daylabel);
-    // //     daydiv.appendChild(day);
-    // //     monthdiv.appendChild(monthlabel);
-    // //     monthdiv.appendChild(month);
-    // //     yeardiv.appendChild(yearlabel);
-    // //     yeardiv.appendChild(year);
-
-    // //     seconddiv.appendChild(daydiv);
-    // //     seconddiv.appendChild(monthdiv);
-    // //     seconddiv.appendChild(yeardiv);
-
-    // //     bdaywrap.appendChild(firstdiv);
-    // //     bdaywrap.appendChild(seconddiv);
-
-    // //     return bdaywrap;
-    // // }
-
-    // function createBirthMonths(){
-    //     const Jan = document.createElement("option");
-    //     const Feb = document.createElement("option");
-    //     const Mar = document.createElement("option");
-    //     const Apr = document.createElement("option");
-    //     const May = document.createElement("option");
-    //     const Jun = document.createElement("option");
-    //     const Jul = document.createElement("option");
-    //     const Aug = document.createElement("option");
-    //     const Sep = document.createElement("option");
-    //     const Oct = document.createElement("option");
-    //     const Nov = document.createElement("option");
-    //     const Dec = document.createElement("option");
-    //     const none = document.createElement("option");
-    //     const months = [none,Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec];
-    //     const monthhtml = ['Month','January','February','March','April','May','June','July','August','September','October','November','December'];
-        
-    //     none.disabled = true;
-    //     none.selected = true;
-    //     none.hidden = true;
-        
-    //     for(let i = 0; i < months.length; i++){
-    //         months[i].setAttribute("value",i);
-    //         months[i].innerHTML = monthhtml[i];
-    //     }
-
-    //     return months;
-    // }
-
-    function createNameInputs(){
-        const namewrapper = document.createElement("div");
-        const fnamediv = document.createElement("div");
-        const lnamediv = document.createElement("div");
-        const firstname = document.createElement("input");
-        const lastname = document.createElement("input");
-        const labelfname = document.createElement("label");
-        const labellname = document.createElement("label");
-
-        //input type = text
-        firstname.setAttribute("type","text");
-        lastname.setAttribute("type","text");
-        firstname.required = true;
-
-        //name = firstname, id = firstname
-        firstname.setAttribute("name","firstname");
-        firstname.setAttribute("id","firstname");
-        firstname.setAttribute("placeholder","Kevin");
-
-        //name = lastname, id = lastname
-        lastname.setAttribute("name","lastname");
-        lastname.setAttribute("id","lastname");
-        lastname.setAttribute("placeholder","Kaslana");
-        lastname.required = true;
-
-        //for = firstname, for = lastname
-        labelfname.setAttribute("for","firstname");
-        labellname.setAttribute("for","lastname");
-
-
-        //label html
-        labelfname.innerHTML = "First Name";
-        labellname.innerHTML = "Last Name";
-
-        $(firstname).addClass("inputfield");
-        $(lastname).addClass("inputfield");
-        
-        $(namewrapper).addClass("doubleboxwrapper");
-        $(fnamediv).addClass("doubleboxlayer");
-        $(lnamediv).addClass("doubleboxlayer");
-
-        $(fnamediv).append(labelfname);
-        $(fnamediv).append(firstname);
-        
-        $(lnamediv).append(labellname);
-        $(lnamediv).append(lastname);
-        $(namewrapper).append(fnamediv);
-        $(namewrapper).append(lnamediv);
-        return namewrapper;
-    }
-
-    // function createProfilePicInput(){
-    //     const allwrap = document.createElement("div");
-        
-    //     const profilepicdiv = document.createElement("div");
-    //     const img = document.createElement("img");
-        
-    //     const labeldiv = document.createElement("div");
-    //     const profilepiclabel = document.createElement("label");
-    //     const profilepic = document.createElement("input");
-        
-
-    //     //set image attributes
-    //     img.setAttribute("src","/images/assets/2logo.png");
-    //     img.setAttribute("id","profilepicimg");
-    //     img.setAttribute("alt","Profile Picture");
-
-    //     profilepiclabel.innerHTML = "Upload Profile Picture";
-
-    //     profilepic.setAttribute("type","file");
-    //     profilepic.setAttribute("name","profilepic");
-    //     profilepic.setAttribute("id","profilepic");
-    //     profilepic.required = true;
-
-    //     $(profilepic).addClass("id","inputfield");
-
-    //     $(allwrap).addClass("imagedivwrapper");
-    //     $(profilepicdiv).addClass("imagediv");
-    //     $(labeldiv).addClass("imagelabel");
-        
-    //     profilepicdiv.appendChild(img);
-
-    //     labeldiv.appendChild(profilepiclabel);
-    //     labeldiv.appendChild(profilepic);
-
-    //     allwrap.appendChild(profilepicdiv);
-    //     allwrap.appendChild(labeldiv);
-
-    //     return allwrap;
-    // }
-
-    // function createBioInput(){
-    //     const biowrap = document.createElement("div");
-    //     const biolabel = document.createElement("label");
-    //     const bio = document.createElement("textarea");
-
-    //     biolabel.innerHTML = "Write a bio";
-
-    //     bio.setAttribute("name","bio");
-    //     bio.setAttribute("id","bio");
-    //     bio.setAttribute("placeholder","I love cafes frfr.");
-    //     bio.setAttribute("alt", "Insert your bio here");
-
-    //     $(biowrap).addClass("singlebox");
-        
-    //     $(bio).addClass("inputfield");
-    //     $(bio).addClass("bioinput");
-
-    //     biowrap.appendChild(biolabel);
-    //     biowrap.appendChild(bio);
-
-    //     return biowrap;
-    // }
-
+    // Initial state
+    updateSubmitButton();
 });

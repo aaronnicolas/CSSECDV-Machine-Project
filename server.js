@@ -23,8 +23,13 @@ import exphbs from "express-handlebars"
 import routes from "./routes/routes.js"
 import dotenv from "dotenv"
 import mongoose from "mongoose"
+import session from "express-session"
+import passport from "passport"
+import { Strategy as LocalStrategy } from "passport-local"
+import bcrypt from "bcrypt"
 
 import { Log } from "./model/logSchema.js"
+import { User } from "./model/userSchema.js"
 
 /***
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -48,6 +53,61 @@ app.engine("hbs", exphbs.engine({
 // Set the template rendering engine
 app.set("view engine", "hbs")
 app.set("views", "./views")
+
+// Body parsing middleware
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+// Session configuration
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key-change-this',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // Set to true if using HTTPS
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}))
+
+// Passport configuration
+passport.use(new LocalStrategy(
+    { usernameField: 'email' },
+    async (email, password, done) => {
+        try {
+            const user = await User.findOne({ email });
+            if (!user) {
+                return done(null, false, { message: 'Incorrect email or password.' });
+            }
+
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (isMatch) {
+                return done(null, user);
+            } else {
+                return done(null, false, { message: 'Incorrect email or password.' });
+            }
+        } catch (error) {
+            return done(error);
+        }
+    }
+));
+
+passport.serializeUser((user, done) => {
+    done(null, user._id);
+});
+
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await User.findById(id);
+        done(null, user);
+    } catch (error) {
+        done(error);
+    }
+});
+
+// Initialize passport
+app.use(passport.initialize())
+app.use(passport.session())
 
 // Connect router to server
 app.use(`/`, routes)
@@ -92,18 +152,15 @@ app.use((err, req, res, next) => {
 
 // 2.4.3 Logger middleware
 app.use((req, res, next) => {
+  const start = Date.now();
   res.on('finish', async () => {
-    //const duration = Date.now() - start;
-    //const log = `${new Date().toISOString()} | ${req.method} ${req.originalUrl} | ${res.statusCode} | ${duration}ms\n`;
-
-    //if (process.env.NODE_ENV !== 'test') console.log(log.trim());
-    //logStream.write(log);
-
+    const duration = Date.now() - start;
+    
      try {
         // Save to MONGODB
         await Log.create({
             event: `${req.method} ${req.originalUrl}`,
-            desc: `Responded with ${res.statusCode} in ${Date.now() - start}ms`,
+            desc: `Responded with ${res.statusCode} in ${duration}ms`,
             id: Date.now(), // Replace with proper increment if needed
             user: req.user?._id || undefined // Make sure req.user exists
         });

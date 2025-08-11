@@ -13,5 +13,6 @@ router.get (`/test`,        controller.test500)
 
 // POSTS
 router.post (`/login`,      authUtility.attemptAuth)
+router.post (`/register`,   authUtility.register)
 
 export default router
