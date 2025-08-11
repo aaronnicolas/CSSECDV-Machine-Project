@@ -27,6 +27,7 @@ import session from "express-session"
 import passport from "passport"
 import { Strategy as LocalStrategy } from "passport-local"
 import bcrypt from "bcrypt"
+import flash from "express-flash"
 
 import { Log } from "./model/logSchema.js"
 import { User } from "./model/userSchema.js"
@@ -74,21 +75,23 @@ app.use(session({
     }
 }))
 
+// Flash message middleware
+app.use(flash())
+
 // Passport configuration
 passport.use(new LocalStrategy(
-    { usernameField: 'email' },
-    async (email, password, done) => {
+    async (username, password, done) => {
         try {
-            const user = await User.findOne({ email });
+            const user = await User.findOne({ username });
             if (!user) {
-                return done(null, false, { message: 'Incorrect email or password.' });
+                return done(null, false, { message: 'Authentication failed. Please check your credentials.' });
             }
 
             const isMatch = await bcrypt.compare(password, user.password);
             if (isMatch) {
                 return done(null, user);
             } else {
-                return done(null, false, { message: 'Incorrect email or password.' });
+                return done(null, false, { message: 'Authentication failed. Please check your credentials.' });
             }
         } catch (error) {
             return done(error);

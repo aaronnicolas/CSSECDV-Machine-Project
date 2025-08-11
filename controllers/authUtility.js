@@ -20,12 +20,12 @@ const authUtility = {
     },
 
     attemptAuth: async (req, res, next) => {
-        const { email, password, confirm_password } = req.body;
+        const { username, password, confirm_password } = req.body;
 
         // Logging in: check required fields
-        if (!email || !password) {
+        if (!username || !password) {
             return res.status(400).render('login', {
-            error: 'Email and password are required!'
+            error: 'Authentication failed. Please check your credentials.'
             });
         }
 
@@ -40,7 +40,7 @@ const authUtility = {
 
         // Attach query feedback on failure
         const queryParams = new URLSearchParams({
-            feedback: 'Incorrect username or password!'
+            feedback: 'Authentication failed. Please check your credentials.'
         }).toString();
 
         // Correct passport usage with redirects
