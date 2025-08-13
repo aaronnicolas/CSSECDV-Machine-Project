@@ -32,6 +32,17 @@ const userSchema = new Schema ({
         type: String,
         required: true
     },
+    failedLoginAttempts: { 
+        type: Number, 
+        default: 0 
+    },
+    lockedUntil: { 
+        type: Date, 
+        default: null 
+    },
+    locked: { 
+        type: Boolean, 
+        default: false },
 })
 
 export const User = mongoose.model('User', userSchema)
