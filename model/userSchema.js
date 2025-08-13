@@ -42,7 +42,26 @@ const userSchema = new Schema ({
     },
     locked: { 
         type: Boolean, 
-        default: false },
+        default: false 
+    },
+    securityQuestion1: {
+        type: String,
+        enum: ['What is your favorite game?', 'What is your favorite color?'],
+        required: true
+    },
+    securityAnswerHash1: {
+        type: String,
+        required: true
+    },
+    securityQuestion2: {
+        type: String,
+        enum: ['What is your favorite game?', 'What is your favorite color?'],
+        required: true
+    },
+    securityAnswerHash2: {
+        type: String,
+        required: true
+    }
 })
 
 export const User = mongoose.model('User', userSchema)
