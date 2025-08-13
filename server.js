@@ -116,6 +116,11 @@ passport.deserializeUser(async (id, done) => {
 app.use(passport.initialize())
 app.use(passport.session())
 
+app.use((req, res, next) => {
+    res.locals.currentUser = req.user ? req.user.username : null;
+    next();
+});
+
 // Connect router to server
 app.use(`/`, routes)
 app.use(express.static('public'))
