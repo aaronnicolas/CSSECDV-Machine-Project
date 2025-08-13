@@ -231,7 +231,7 @@ const authUtility = {
 
         await user.save();
 
-        res.redirect(`/`);
+        res.redirect(`/logout`)
 
     } catch (err) {
         console.error('Change password error:', err);
