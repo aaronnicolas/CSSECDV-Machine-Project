@@ -28,6 +28,11 @@ const userSchema = new Schema ({
         required: true
     },
 
+    passwordChangedAt: {
+        type: Date,
+        default: Date.now
+    },
+
     salt: {
         type: String,
         required: true

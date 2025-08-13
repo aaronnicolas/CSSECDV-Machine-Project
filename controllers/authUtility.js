@@ -147,6 +147,7 @@ const authUtility = {
             username,
             email,
             password: hashedPassword,
+            passwordChangedAt: new Date(),
             salt,
             role: 0,
             locked: 0,
@@ -200,6 +201,19 @@ const authUtility = {
             });
         }
 
+        // Check password age requirement (must be at least 1 day old)
+        if (user.passwordChangedAt) {
+            const oneDayInMs = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+            const passwordAge = Date.now() - user.passwordChangedAt.getTime();
+            
+            if (passwordAge < oneDayInMs) {
+                const hoursLeft = Math.ceil((oneDayInMs - passwordAge) / (60 * 60 * 1000));
+                return res.status(400).render('changepassword', {
+                    error: `Password can only be changed once every 24 hours. Please wait ${hoursLeft} more hours before changing your password again.`
+                });
+            }
+        }
+
         // Check if new password matches confirmation
         if (newPassword !== confirmNewPassword) {
             return res.status(400).render('changepassword', {
@@ -228,6 +242,9 @@ const authUtility = {
         const saltRounds = 12;
         const salt = await bcrypt.genSalt(saltRounds);
         user.password = await bcrypt.hash(newPassword, salt);
+
+        // Update password changed timestamp
+        user.passwordChangedAt = new Date();
 
         await user.save();
 
