@@ -1,0 +1,30 @@
+<div class="login-page d-flex justify-content-center align-items-center">
+  <div class="login-card glass-card p-4">
+    <h2 class="text-center mb-4 text-white">Verify Security Questions</h2>
+
+    {{#if error}}
+      <div class="alert alert-danger text-center">
+        {{error}}
+      </div>
+    {{/if}}
+
+    <form action="/securityquestion" method="POST">
+      <div class="mb-3">
+        <label for="securityAnswer1" class="form-label text-white">What is your favorite game?</label>
+        <input type="text" id="securityAnswer1" name="securityAnswer1"
+               class="form-control bg-transparent text-white border-light"
+               pattern=".{4,}" title="Answer must be at least 4 characters" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="securityAnswer2" class="form-label text-white">What is your favorite color?</label>
+        <input type="text" id="securityAnswer2" name="securityAnswer2"
+               class="form-control bg-transparent text-white border-light"
+               pattern=".{3,}" title="Answer must be at least 3 characters" required />
+      </div>
+
+      <button type="submit" class="btn btn-light w-100 mt-3 glow-hover">Submit</button>
+      <input type="hidden" name="username" value="{{currentUser}}" />
+    </form>
+  </div>
+</div>
