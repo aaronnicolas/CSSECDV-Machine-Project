@@ -20,44 +20,59 @@ const authUtility = {
     },
 
     attemptAuth: async (req, res, next) => {
-        const { username, password, confirm_password } = req.body;
+    const { username, password, confirm_password } = req.body;
 
-        // Logging in: check required fields
-        if (!username || !password) {
-            return res.status(400).render('login', {
+    if (!username || !password) {
+        return res.status(400).render('login', {
             error: 'Invalid username and/or password'
+        });
+    }
+
+    // Fetch user to check lock state
+    const user = await User.findOne({ username });
+    if (user) {
+        const now = new Date();
+
+        // Check if locked
+        if (user.locked && user.lockedUntil && now < user.lockedUntil) {
+            const waitMinutes = Math.ceil((user.lockedUntil - now) / 60000);
+            return res.status(403).render('login', {
+                error: `Account locked. Try again in ${waitMinutes} minute(s).`
             });
         }
+    }
 
-        // Register: check passwords
-        if (confirm_password && password !== confirm_password) {
-            return res.status(400).render('register', {
-            error: 'Passwords do not match!'
-            });
+    // Use passport for authentication
+    passport.authenticate('local', async (err, userObj, info) => {
+        if (err) { return next(err); }
+
+        if (!userObj) {
+            // Failed attempt
+            if (user) {
+                user.failedLoginAttempts += 1;
+
+                if (user.failedLoginAttempts >= 5) {
+                    user.locked = true;
+                    user.lockedUntil = new Date(Date.now() + 15 * 60000); // 15 minutes lock
+                }
+                await user.save();
+            }
+
+            return res.redirect(`/login?feedback=Invalid username and/or password`);
         }
 
-        console.log('Attempting to Authenticate!');
+        // Successful login
+        userObj.failedLoginAttempts = 0;
+        userObj.locked = false;
+        userObj.lockedUntil = null;
+        await userObj.save();
 
-        // Attach query feedback on failure
-        const queryParams = new URLSearchParams({
-            feedback: 'Invalid username and/or password'
-        }).toString();
+        req.logIn(userObj, (err) => {
+            if (err) { return next(err); }
+            res.redirect('/');
+        });
 
-        // Correct passport usage with redirects
-        passport.authenticate('local', {
-            successRedirect: '/',
-            failureRedirect: `/login?${queryParams}`,
-            failureFlash: true,
         })(req, res, next);
-    },
-
-
-    logout: (req, res) => {
-        // Basically just redirect to index
-        req.logout((err) => {
-            if (err) { return next(err) }
-            res.redirect('/')
-        })
     },
 
     getRegister: async (req, res) => {
