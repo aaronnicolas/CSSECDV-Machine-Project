@@ -66,6 +66,80 @@ const userSchema = new Schema ({
     securityAnswerHash2: {
         type: String,
         required: true
+    },
+
+    lastLoginAttempt: {
+        timestamp: {
+            type: Date,
+            default: null
+        },
+        successful: {
+            type: Boolean,
+            default: null
+        },
+        ipAddress: {
+            type: String,
+            default: null
+        },
+        userAgent: {
+            type: String,
+            default: null
+        },
+        deviceInfo: {
+            browser: {
+                type: String,
+                default: null
+            },
+            os: {
+                type: String,
+                default: null
+            },
+            deviceType: {
+                type: String,
+                default: null
+            },
+            isMobile: {
+                type: Boolean,
+                default: false
+            }
+        }
+    },
+
+    previousLoginAttempt: {
+        timestamp: {
+            type: Date,
+            default: null
+        },
+        successful: {
+            type: Boolean,
+            default: null
+        },
+        ipAddress: {
+            type: String,
+            default: null
+        },
+        userAgent: {
+            type: String,
+            default: null
+        },
+        deviceInfo: {
+            browser: {
+                type: String,
+                default: null
+            },
+            os: {
+                type: String,
+                default: null
+            },
+            deviceType: {
+                type: String,
+                default: null
+            },
+            isMobile: {
+                type: Boolean,
+                default: false
+            }
+        }
     }
 })
 

@@ -1,5 +1,17 @@
 <link rel="stylesheet" href="css/orrery.css" />
 
+{{#if lastLoginMessage}}
+<div class="container-fluid position-fixed top-0 start-0 w-100" style="z-index: 1050; padding-top: 20px;">
+  <div class="container">
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+      <i class="fas fa-info-circle me-2"></i>
+      <strong>Login Information:</strong> {{lastLoginMessage}}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+{{/if}}
+
 <div
   class="quote-container d-flex justify-content-center align-items-center vh-100 text-white text-center px-4 overflow-hidden"
 >

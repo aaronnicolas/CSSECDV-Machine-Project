@@ -3,6 +3,174 @@ import passport from 'passport'
 import passwordValidator from '../utils/passwordValidator.js'
 import { User } from '../model/userSchema.js'
 
+// Helper function to record login attempt (current attempt only)
+async function recordLoginAttempt(user, successful, req) {
+    // Parse device information
+    const deviceInfo = parseDeviceInfo(req.get('User-Agent'));
+
+    // Record new attempt (data moving is handled separately)
+    user.lastLoginAttempt = {
+        timestamp: new Date(),
+        successful: successful,
+        ipAddress: req.ip || req.connection.remoteAddress || 'Unknown',
+        userAgent: (req.get('User-Agent') || 'Unknown').substring(0, 200),
+        deviceInfo: deviceInfo
+    };
+
+    await user.save();
+}
+
+// Generate last login message
+function generateLastLoginMessage(user) {
+    if (!user.previousLoginAttempt || !user.previousLoginAttempt.timestamp) {
+        return "Welcome! This is your first login to our system.";
+    }
+
+    const lastAttempt = user.previousLoginAttempt;
+    const timeAgo = formatTimeAgo(lastAttempt.timestamp);
+    const status = lastAttempt.successful ? 'successful' : 'failed';
+    
+    // Build device description
+    let deviceDesc = 'unknown device';
+    if (lastAttempt.deviceInfo) {
+        const { browser, os, deviceType } = lastAttempt.deviceInfo;
+        deviceDesc = `${browser} on ${os}`;
+        if (deviceType) {
+            deviceDesc += ` (${deviceType})`;
+        }
+    }
+    
+    const cleanIP = cleanIPAddress(lastAttempt.ipAddress);
+    return `Last login attempt: ${status} ${timeAgo} from ${deviceDesc} - IP ${cleanIP}`;
+}
+
+// Format time difference in human readable format
+function formatTimeAgo(date) {
+    const now = new Date();
+    const diff = now - date;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor(diff / (1000 * 60));
+
+    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    return 'just now';
+}
+
+// Clean up IP address display format
+function cleanIPAddress(ipAddress) {
+    if (!ipAddress || ipAddress === 'Unknown') {
+        return 'Unknown';
+    }
+    
+    // Handle IPv6-mapped IPv4 addresses (::ffff:x.x.x.x)
+    if (ipAddress.startsWith('::ffff:')) {
+        const ipv4Part = ipAddress.substring(7); // Remove "::ffff:" prefix
+        // Validate it's actually an IPv4 address
+        if (/^(\d{1,3}\.){3}\d{1,3}$/.test(ipv4Part)) {
+            return ipv4Part;
+        }
+    }
+    
+    // Handle localhost variations
+    if (ipAddress === '::1') {
+        return 'localhost (IPv6)';
+    }
+    
+    // Return original IP for actual IPv6 addresses and regular IPv4
+    return ipAddress;
+}
+
+// Parse device information from user agent string
+function parseDeviceInfo(userAgent) {
+    if (!userAgent) {
+        return {
+            browser: 'Unknown Browser',
+            os: 'Unknown OS',
+            deviceType: 'Desktop',
+            isMobile: false
+        };
+    }
+
+    let browser = 'Unknown Browser';
+    let os = 'Unknown OS';
+    let deviceType = 'Desktop';
+    let isMobile = false;
+
+    // Parse browser
+    if (userAgent.includes('Chrome/')) {
+        const chromeVersion = userAgent.match(/Chrome\/([\d.]+)/);
+        browser = chromeVersion ? `Chrome ${chromeVersion[1].split('.')[0]}` : 'Chrome';
+    } else if (userAgent.includes('Firefox/')) {
+        const firefoxVersion = userAgent.match(/Firefox\/([\d.]+)/);
+        browser = firefoxVersion ? `Firefox ${firefoxVersion[1]}` : 'Firefox';
+    } else if (userAgent.includes('Safari/') && !userAgent.includes('Chrome')) {
+        const safariVersion = userAgent.match(/Version\/([\d.]+)/);
+        browser = safariVersion ? `Safari ${safariVersion[1]}` : 'Safari';
+    } else if (userAgent.includes('Edge/')) {
+        const edgeVersion = userAgent.match(/Edge\/([\d.]+)/);
+        browser = edgeVersion ? `Edge ${edgeVersion[1]}` : 'Edge';
+    }
+
+    // Parse OS
+    if (userAgent.includes('Windows NT')) {
+        const winVersion = userAgent.match(/Windows NT ([\d.]+)/);
+        if (winVersion) {
+            const version = winVersion[1];
+            if (version === '10.0') os = 'Windows 10';
+            else if (version === '6.3') os = 'Windows 8.1';
+            else if (version === '6.1') os = 'Windows 7';
+            else os = `Windows ${version}`;
+        } else {
+            os = 'Windows';
+        }
+    } else if (userAgent.includes('Mac OS X')) {
+        const macVersion = userAgent.match(/Mac OS X ([\d_]+)/);
+        os = macVersion ? `macOS ${macVersion[1].replace(/_/g, '.')}` : 'macOS';
+    } else if (userAgent.includes('Linux')) {
+        os = 'Linux';
+    } else if (userAgent.includes('Android')) {
+        const androidVersion = userAgent.match(/Android ([\d.]+)/);
+        os = androidVersion ? `Android ${androidVersion[1]}` : 'Android';
+    } else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
+        const iosVersion = userAgent.match(/OS ([\d_]+)/);
+        os = iosVersion ? `iOS ${iosVersion[1].replace(/_/g, '.')}` : 'iOS';
+    }
+
+    // Detect device type
+    if (userAgent.includes('Mobile') || userAgent.includes('iPhone') || userAgent.includes('Android')) {
+        deviceType = 'Mobile';
+        isMobile = true;
+    } else if (userAgent.includes('iPad') || userAgent.includes('Tablet')) {
+        deviceType = 'Tablet';
+        isMobile = true;
+    } else {
+        deviceType = 'Desktop';
+        isMobile = false;
+    }
+
+    return {
+        browser: browser,
+        os: os,
+        deviceType: deviceType,
+        isMobile: isMobile
+    };
+}
+
+// Helper function to move current attempt to previous
+function moveCurrentAttemptToPrevious(user) {
+    if (user.lastLoginAttempt) {
+        user.previousLoginAttempt = {
+            timestamp: user.lastLoginAttempt.timestamp,
+            successful: user.lastLoginAttempt.successful,
+            ipAddress: user.lastLoginAttempt.ipAddress,
+            userAgent: user.lastLoginAttempt.userAgent,
+            deviceInfo: user.lastLoginAttempt.deviceInfo
+        };
+    }
+}
+
 const authUtility = {
 
     getLogin: (req, res) => {
@@ -49,6 +217,12 @@ const authUtility = {
         if (!userObj) {
             // Failed attempt
             if (user) {
+                // Move current to previous before recording failed attempt
+                moveCurrentAttemptToPrevious(user);
+                
+                // Record failed login attempt
+                await recordLoginAttempt(user, false, req);
+                
                 user.failedLoginAttempts += 1;
 
                 if (user.failedLoginAttempts >= 5) {
@@ -65,11 +239,19 @@ const authUtility = {
         userObj.failedLoginAttempts = 0;
         userObj.locked = false;
         userObj.lockedUntil = null;
-        await userObj.save();
+        
+        // Move current attempt to previous BEFORE generating message
+        moveCurrentAttemptToPrevious(userObj);
+        
+        // Generate last login message with correctly updated data
+        const lastLoginMessage = generateLastLoginMessage(userObj);
+        
+        // Record this successful login attempt
+        await recordLoginAttempt(userObj, true, req);
 
         req.logIn(userObj, (err) => {
             if (err) { return next(err); }
-            res.redirect('/');
+            res.redirect(`/?lastLoginMessage=${encodeURIComponent(lastLoginMessage)}`);
         });
 
         })(req, res, next);

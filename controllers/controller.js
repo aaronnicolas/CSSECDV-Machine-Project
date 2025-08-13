@@ -6,7 +6,8 @@ const controller = {
     home: async (req, res) => {
         try {
             res.render('home', {
-                user: req.user || null
+                user: req.user || null,
+                lastLoginMessage: req.query.lastLoginMessage || null
             })
         }
         catch (err) {
