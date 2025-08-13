@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const strengthText = document.getElementById('password-strength-text');
     const matchIndicator = document.getElementById('password-match-indicator');
     const matchText = document.getElementById('password-match-text');
-    const registerBtn = document.getElementById('register-btn');
+    const changePasswordBtn = document.getElementById('change-password-btn');
 
     // Password requirement elements
     const reqLength = document.getElementById('req-length');
@@ -134,19 +134,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const passwordValidation = validatePassword(passwordInput.value);
         const passwordsMatch = checkPasswordMatch();
         const allFieldsFilled = 
-                                document.getElementById('username').value.trim() && 
-                                document.getElementById('email').value.trim() && 
-                                passwordInput.value && 
-                                confirmPasswordInput.value && 
-                                document.querySelector('[name="securityAnswer1"]').value.trim() &&
-                                document.querySelector('[name="securityAnswer2"]').value.trim();
+            document.getElementById('currentPassword').value.trim() && 
+            passwordInput.value && 
+            confirmPasswordInput.value;
 
         if (passwordValidation.isValid && passwordsMatch && allFieldsFilled) {
-            registerBtn.disabled = false;
-            registerBtn.style.opacity = '1';
+            changePasswordBtn.disabled = false;
+            changePasswordBtn.style.opacity = '1';
         } else {
-            registerBtn.disabled = true;
-            registerBtn.style.opacity = '0.6';
+            changePasswordBtn.disabled = true;
+            changePasswordBtn.style.opacity = '0.6';
         }
     }
 
@@ -168,8 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Other field change handlers
-    document.getElementById('username').addEventListener('input', updateSubmitButton);
-    document.getElementById('email').addEventListener('input', updateSubmitButton);
+    document.getElementById('currentPassword').addEventListener('input', updateSubmitButton);
 
     // Form submission handler
     document.querySelector('form').addEventListener('submit', function(e) {
