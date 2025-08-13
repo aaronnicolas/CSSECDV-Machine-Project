@@ -18,7 +18,7 @@ const controller = {
     login: async (req, res) => {
         try {
             res.render('login', {
-                error: req.query.feedback || req.query.message,
+                error: req.query.feedback,
                 success: req.query.message && !req.query.feedback ? req.query.message : null
             })
         }
