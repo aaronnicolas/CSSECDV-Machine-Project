@@ -28,7 +28,7 @@
     <div class="collapse navbar-collapse" id="navbarContent">
       <ul class="navbar-nav me-auto">
         <li class="nav-item">
-          <span class="nav-link">Hello, {{currentUser}}</span>
+          <span class="nav-link">Hello, {{#if currentUser}}{{currentUser}}{{else}}wanderer{{/if}}</span>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="/">home</a>
