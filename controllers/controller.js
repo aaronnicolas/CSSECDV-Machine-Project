@@ -6,7 +6,7 @@ const controller = {
     home: async (req, res) => {
         try {
             res.render('home', {
-
+                user: req.user || null
             })
         }
         catch (err) {
@@ -85,7 +85,8 @@ const controller = {
                     labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
                     data: [1800, 2100, 1950, 2200, 2500, 2700, 3100]
                     }
-                ]
+                ],
+                user: req.user
                 }
             )
         }
@@ -118,7 +119,8 @@ const controller = {
                     labels: ['Week 1', 'Week 2', 'Week 3'],
                     data: [10, 15, 8]
                     }
-                ]
+                ],
+                user: req.user
             })
         }
         catch (err) {
@@ -144,7 +146,8 @@ const controller = {
                     labels: ['Week 1', 'Week 2', 'Week 3'],
                     data: [1, 2, 2]
                     }
-                ]
+                ],
+                user: req.user
             })
         }
         catch (err) {

@@ -121,11 +121,20 @@ app.use(`/`, routes)
 app.use(express.static('public'))
 
 
+// Authentication error handler
+app.use((err, req, res, next) => {
+    if (err.status === 401) {
+        return res.redirect('/login?feedback=Please log in to access this page');
+    }
+    next(err);
+});
+
 // Missing Page handler
 app.use((req, res, next) => {
     res.status(404).render("404", {
         title: "Page Not Found",
         layout: "error",
+        user: req.user || null
     })
 })
 
