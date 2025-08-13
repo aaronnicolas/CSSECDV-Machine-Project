@@ -18,7 +18,7 @@ const controller = {
     login: async (req, res) => {
         try {
             res.render('login', {
-                error: req.query.feedback,
+                error: req.query.feedback || req.query.message,
                 success: req.query.message && !req.query.feedback ? req.query.message : null
             })
         }
@@ -165,6 +165,27 @@ const controller = {
         }
     },
 
+    changepassword: async(req, res, next) => {
+        try {
+            res.render('changepassword', {
+
+            })
+        }
+        catch (err) {
+            next(err)
+        }
+    },
+
+    securityquestion: async(req, res, next) => {
+        try {
+            res.render('securityquestion', {
+
+            })
+        }
+        catch (err) {
+            next(err)
+        }
+    },
 
 
 

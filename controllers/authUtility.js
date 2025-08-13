@@ -97,72 +97,148 @@ const authUtility = {
     },
 
     register: async (req, res) => {
-        try {
-            const { username, email, password, confirm_password } = req.body;
+    try {
+        const { username, email, password, confirm_password, securityAnswer1, securityAnswer2 } = req.body;
 
-            // Check required fields
-            if (!username || !email || !password) {
-                return res.status(400).render('register', {
-                    error: 'All fields are required!'
-                });
-            }
-
-            // Check password confirmation
-            if (confirm_password && password !== confirm_password) {
-                return res.status(400).render('register', {
-                    error: 'Passwords do not match!'
-                });
-            }
-
-            // Validate password complexity
-            const passwordValidation = passwordValidator.validate(password);
-            if (!passwordValidation.isValid) {
-                return res.status(400).render('register', {
-                    error: passwordValidation.errors.join(', ')
-                });
-            }
-
-            // Check if user already exists
-            const existingUser = await User.findOne({ 
-                $or: [{ username }, { email }] 
-            });
-            
-            if (existingUser) {
-                return res.status(400).render('register', {
-                    error: 'Username or email already exists!'
-                });
-            }
-
-            // Generate salt and hash password
-            const saltRounds = 12;
-            const salt = await bcrypt.genSalt(saltRounds);
-            const hashedPassword = await bcrypt.hash(password, salt);
-
-            // Create new user
-            const newUser = new User({
-                username,
-                email,
-                password: hashedPassword,
-                salt,
-                role: 0,
-                locked: 0
-            });
-
-            await newUser.save();
-
-            // Redirect to login with success message
-            const queryParams = new URLSearchParams({
-                message: 'Registration successful! Please log in.'
-            }).toString();
-            
-            res.redirect(`/login?${queryParams}`);
-
-        } catch (err) {
-            console.error('Registration error:', err);
-            res.status(500).render('register', {
-                error: 'An error occurred during registration. Please try again.'
+        // Check required fields
+        if (!username || !email || !password || !securityAnswer1 || !securityAnswer2) {
+            return res.status(400).render('register', {
+                error: 'All fields are required!'
             });
         }
+
+        // Check password confirmation
+        if (confirm_password && password !== confirm_password) {
+            return res.status(400).render('register', {
+                error: 'Passwords do not match!'
+            });
+        }
+
+        // Validate password complexity
+        const passwordValidation = passwordValidator.validate(password);
+        if (!passwordValidation.isValid) {
+            return res.status(400).render('register', {
+                error: passwordValidation.errors.join(', ')
+            });
+        }
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ 
+            $or: [{ username }, { email }] 
+        });
+        
+        if (existingUser) {
+            return res.status(400).render('register', {
+                error: 'Username or email already exists!'
+            });
+        }
+
+        // Generate salt and hash password
+        const saltRounds = 12;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Hash security answers (case-insensitive matching)
+        const securityAnswerHash1 = await bcrypt.hash(securityAnswer1.trim().toLowerCase(), 10);
+        const securityAnswerHash2 = await bcrypt.hash(securityAnswer2.trim().toLowerCase(), 10);
+
+        // Create new user
+        const newUser = new User({
+            username,
+            email,
+            password: hashedPassword,
+            salt,
+            role: 0,
+            locked: 0,
+            securityQuestion1: 'What is your favorite game?',
+            securityAnswerHash1,
+            securityQuestion2: 'What is your favorite color?',
+            securityAnswerHash2
+        });
+
+        await newUser.save();
+
+        // Redirect to login with success message
+        const queryParams = new URLSearchParams({
+            message: 'Registration successful! Please log in.'
+        }).toString();
+        
+        res.redirect(`/login?${queryParams}`);
+
+    } catch (err) {
+        console.error('Registration error:', err);
+        res.status(500).render('register', {
+            error: 'An error occurred during registration. Please try again.'
+        });
+    }
+    },
+
+    changePassword: async (req, res) => {
+    try {
+        const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+        // Check if all fields are filled
+        if (!currentPassword || !newPassword || !confirmNewPassword) {
+            return res.status(400).render('changepassword', {
+                error: 'All fields are required!'
+            });
+        }
+
+        // Get logged in user
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).render('changepassword', {
+                error: 'User not found.'
+            });
+        }
+
+        // Verify current password
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).render('changepassword', {
+                error: 'Current password is incorrect.'
+            });
+        }
+
+        // Check if new password matches confirmation
+        if (newPassword !== confirmNewPassword) {
+            return res.status(400).render('changepassword', {
+                error: 'New passwords do not match.'
+            });
+        }
+
+        // Ensure new password is not the same as the current one
+        if (await bcrypt.compare(newPassword, user.password)) {
+            return res.status(400).render('changepassword', {
+                error: 'New password cannot be the same as the current password.'
+            });
+        }
+
+        // Ensure new password is not the same as previous password
+        if (user.previousPasswordHash && await bcrypt.compare(newPassword, user.previousPasswordHash)) {
+            return res.status(400).render('changepassword', {
+                error: 'New password cannot be the same as the previous password.'
+            });
+        }
+
+        // Save old password as previous
+        user.previousPasswordHash = user.password;
+
+        // Hash new password
+        const saltRounds = 12;
+        const salt = await bcrypt.genSalt(saltRounds);
+        user.password = await bcrypt.hash(newPassword, salt);
+
+        await user.save();
+
+        res.redirect(`/`);
+
+    } catch (err) {
+        console.error('Change password error:', err);
+        res.status(500).render('changepassword', {
+            error: 'An error occurred while changing password. Please try again.'
+        });
+    }
     },
 
     logout: (req, res, next) => {
