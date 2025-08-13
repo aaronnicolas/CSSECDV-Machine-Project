@@ -54,6 +54,51 @@
           </div>
         </div>
 
+        <!-- Security Questions -->
+        <div class="mb-3">
+          <label class="form-label text-white">Security Question 1</label>
+          <input
+            type="text"
+            class="form-control bg-transparent text-white border-light"
+            value="What is your favorite game?"
+            readonly
+          />
+          <input
+            type="hidden"
+            name="securityQuestion1"
+            value="favorite_game"
+          />
+          <input
+            type="text"
+            name="securityAnswer1"
+            class="form-control bg-transparent text-white border-light mt-2"
+            placeholder="Enter your answer"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-white">Security Question 2</label>
+          <input
+            type="text"
+            class="form-control bg-transparent text-white border-light"
+            value="What is your favorite color?"
+            readonly
+          />
+          <input
+            type="hidden"
+            name="securityQuestion2"
+            value="favorite_color"
+          />
+          <input
+            type="text"
+            name="securityAnswer2"
+            class="form-control bg-transparent text-white border-light mt-2"
+            placeholder="Enter your answer"
+            required
+          />
+        </div>
+
         <!-- Password Requirements -->
         <div class="mt-3">
           <small class="text-white d-block mb-2">Password Requirements:</small>
