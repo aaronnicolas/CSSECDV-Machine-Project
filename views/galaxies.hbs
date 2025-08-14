@@ -2,9 +2,9 @@
 <div class="container">
   <h1>🌌 Galaxies Cafe Reviews</h1>
 
-  {{#if currentUser}}
-    <button class="btn create">+ Create Review</button>
-  {{/if}}
+  {{!#if currentUser}}
+    
+  {{!/if}}
 
   {{!-- Mocked Review 1 --}}
   <div class="review-card">
@@ -13,11 +13,11 @@
     <small>by <span class="account-link">AstroLover99</span></small>
 
     {{#if currentUser}}
-      {{#if currentUser.isTypeA}}
+      {{#if currentUser}}
         <button class="btn delete">Delete</button>
-      {{else if currentUser.isAdmin}}
+      {{else if (eq currentUser.role 2)}}
         <button class="btn delete">Delete</button>
-      {{else if currentUser.isModerator}}
+      {{else if (eq currentUser.role 1)}}
         <button class="btn delete">Delete</button>
       {{/if}}
     {{/if}}
@@ -30,7 +30,7 @@
     <small>by <span class="account-link">CoffeeExplorer</span></small>
 
     {{#if currentUser}}
-      {{#if currentUser.isTypeA}}
+      {{#if currentUser}}
         <button class="btn delete">Delete</button>
       {{else if currentUser.isAdmin}}
         <button class="btn delete">Delete</button>
@@ -44,7 +44,7 @@
   <div class="review-card">
     <h3><span class="place-link">Galaxy Grind</span> ⭐ 5.0</h3>
     <p>Best interstellar cappuccino! Perfect for stargazing vibes.</p>
-    <small>by <span class="account-link">NebulaNerd</span></small>
+    <small>by <span class="account-link">qwerty</span></small>
 
     {{#if currentUser}}
       {{#if currentUser}}

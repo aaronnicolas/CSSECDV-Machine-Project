@@ -18,6 +18,7 @@
  * Date: 2025/07/27
  */
 
+import { engine } from 'express-handlebars';
 import express from "express"
 import exphbs from "express-handlebars"
 import routes from "./routes/routes.js"
@@ -51,7 +52,8 @@ app.engine("hbs", exphbs.engine({
     defaultLayout: 'main',
     helpers: {
       gt: (a, b) => Number(a) > Number(b),
-      json: (context) => JSON.stringify(context, null, 2)
+      json: (context) => JSON.stringify(context, null, 2),
+      eq: (a, b) => a == b
     }
 }))
 

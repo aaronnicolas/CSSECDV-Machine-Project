@@ -20,7 +20,12 @@ router.get (`/changepassword`, requireAuth, controller.changepassword) // PROTEC
 router.get (`/securityquestion`, requireAuth, controller.securityquestion) // PROTECTED
 router.get (`/user_profile`, requireAuth, controller.user_profile) // PROTECTED
 router.get (`/galaxies`, requireAuth, controller.galaxies) // PROTECTED
-router.get('/star_admin/analytics', requireRole(2), controller.analytics);
+router.get('/star_admin/users', requireRole(2), controller.users); // ADMIN ONLY
+router.get('/star_admin/observations', requireRole(2), controller.observations); // ADMIN ONLY
+router.get('/star_admin/reviews', requireRole(2), controller.reviews); // ADMIN ONLY
+router.get('/star_admin/settings', requireRole(2), controller.settings); // ADMIN ONLY
+router.get('/star_admin/analytics', requireRole(2), controller.analytics); // ADMIN ONLY
+router.get (`/star_sentinel/users`, requireAuth, requireRole(1), controller.moderate) // MODERATOR+
 
 // POSTS
 router.post (`/login`,      authUtility.attemptAuth)            // PUBLIC
