@@ -8,9 +8,9 @@
 
   {{!-- Mocked Review 1 --}}
   <div class="review-card">
-    <h3>Starbrew Cafe ⭐ 4.5</h3>
+    <h3><span class="place-link">Starbrew Cafe</span> ⭐ 4.5</h3>
     <p>Amazing cosmic-themed drinks and cozy atmosphere!</p>
-    <small>by AstroLover99</small>
+    <small>by <span class="account-link">AstroLover99</span></small>
 
     {{#if currentUser}}
       {{#if currentUser.isTypeA}}
@@ -25,9 +25,9 @@
 
   {{!-- Mocked Review 2 --}}
   <div class="review-card">
-    <h3>Moonlight Mocha ⭐ 4.0</h3>
+    <h3><span class="place-link">Moonlight Mocha</span> ⭐ 4.0</h3>
     <p>Love the lunar latte art, but a bit pricey.</p>
-    <small>by CoffeeExplorer</small>
+    <small>by <span class="account-link">CoffeeExplorer</span></small>
 
     {{#if currentUser}}
       {{#if currentUser.isTypeA}}
@@ -42,9 +42,9 @@
 
   {{!-- Mocked Review 3 --}}
   <div class="review-card">
-    <h3>Galaxy Grind ⭐ 5.0</h3>
+    <h3><span class="place-link">Galaxy Grind</span> ⭐ 5.0</h3>
     <p>Best interstellar cappuccino! Perfect for stargazing vibes.</p>
-    <small>by cardo.ryzmix@gmail.com</small>
+    <small>by <span class="account-link">NebulaNerd</span></small>
 
     {{#if currentUser}}
       {{#if currentUser}}
@@ -102,5 +102,17 @@
   .btn.create {
     display: block;
     margin: 2rem auto;
+  }
+
+  /* Mock link styling */
+  .place-link,
+  .account-link {
+    text-decoration: underline;
+    cursor: pointer;
+    color: #ffffff;
+  }
+  .place-link:hover,
+  .account-link:hover {
+    color: #6c63ff;
   }
 </style>
