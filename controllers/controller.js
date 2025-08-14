@@ -225,7 +225,58 @@ const controller = {
         catch (err) {
             next (err)
         }
-    }
+    },
+    users: async(req, res) => {
+        try{
+            res.render ('star_admin', {
+                layout: "admin"
+            })
+        }
+        catch (err) {
+            next (err)
+        }
+    },
+    observations: async(req, res) => {
+        try{
+            res.render ('star_admin', {
+                layout: "admin"
+            })
+        }
+        catch (err) {
+            next (err)
+        }
+    },
+    reviews: async(req, res) => {
+        try{
+            res.render ('star_admin', {
+                layout: "admin"
+            })
+        }
+        catch (err) {
+            next (err)
+        }
+    },
+    settings: async(req, res) => {
+        try{
+            res.render ('star_admin', {
+                layout: "admin"
+            })
+        }
+        catch (err) {
+            next (err)
+        }
+    },
+    moderate: async(req, res) => {
+        try{
+            res.render ('star_sentinel', {
+                layout: "admin"
+            })
+        }
+        catch (err) {
+            next (err)
+        }
+    },
+
     
 }
 
