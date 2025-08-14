@@ -199,7 +199,16 @@ const controller = {
             next(err)
         }
     },
+    galaxies: async(req, res) => {
+        try {
+            res.render ('galaxies', {
 
+            })
+        }
+        catch (err) {
+            next(err)
+        }
+    },
     
 }
 
