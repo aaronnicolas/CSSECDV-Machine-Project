@@ -1,4 +1,4 @@
-
+import { Log } from '../model/logSchema.js';
 
 const controller = {
     
@@ -189,7 +189,7 @@ const controller = {
     },
 
     
-    user_profile: async(req, res) => {
+    user_profile: async(req, res, next) => {
         try {
             res.render ('user_profile', {
 
@@ -199,7 +199,7 @@ const controller = {
             next(err)
         }
     },
-    galaxies: async(req, res) => {
+    galaxies: async(req, res, next) => {
         try {
             res.render ('galaxies', {
 
@@ -209,9 +209,16 @@ const controller = {
             next(err)
         }
     },
-    analytics: async(req, res) => {
+    analytics: async(req, res, next) => {
         try{
-            res.render ('star_admin', {
+            const logs = await Log.find()
+            .populate('user', 'username email') 
+            .sort({ timestamp: -1 })
+            .lean(); 
+
+            res.render('logs', { logs });
+
+            res.render ('logs', {
                 layout: "admin"
             })
         }
