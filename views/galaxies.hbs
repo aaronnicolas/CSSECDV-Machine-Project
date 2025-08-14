@@ -1,0 +1,118 @@
+{{!-- galaxies.hbs --}}
+<div class="container">
+  <h1>🌌 Galaxies Cafe Reviews</h1>
+
+  {{#if currentUser}}
+    <button class="btn create">+ Create Review</button>
+  {{/if}}
+
+  {{!-- Mocked Review 1 --}}
+  <div class="review-card">
+    <h3><span class="place-link">Starbrew Cafe</span> ⭐ 4.5</h3>
+    <p>Amazing cosmic-themed drinks and cozy atmosphere!</p>
+    <small>by <span class="account-link">AstroLover99</span></small>
+
+    {{#if currentUser}}
+      {{#if currentUser.isTypeA}}
+        <button class="btn delete">Delete</button>
+      {{else if currentUser.isAdmin}}
+        <button class="btn delete">Delete</button>
+      {{else if currentUser.isModerator}}
+        <button class="btn delete">Delete</button>
+      {{/if}}
+    {{/if}}
+  </div>
+
+  {{!-- Mocked Review 2 --}}
+  <div class="review-card">
+    <h3><span class="place-link">Moonlight Mocha</span> ⭐ 4.0</h3>
+    <p>Love the lunar latte art, but a bit pricey.</p>
+    <small>by <span class="account-link">CoffeeExplorer</span></small>
+
+    {{#if currentUser}}
+      {{#if currentUser.isTypeA}}
+        <button class="btn delete">Delete</button>
+      {{else if currentUser.isAdmin}}
+        <button class="btn delete">Delete</button>
+      {{else if currentUser.isModerator}}
+        <button class="btn delete">Delete</button>
+      {{/if}}
+    {{/if}}
+  </div>
+
+  {{!-- Mocked Review 3 --}}
+  <div class="review-card">
+    <h3><span class="place-link">Galaxy Grind</span> ⭐ 5.0</h3>
+    <p>Best interstellar cappuccino! Perfect for stargazing vibes.</p>
+    <small>by <span class="account-link">NebulaNerd</span></small>
+
+    {{#if currentUser}}
+      {{#if currentUser}}
+        <button class="btn delete">Delete</button>
+      {{else if currentUser.isAdmin}}
+        <button class="btn delete">Delete</button>
+      {{else if currentUser.isModerator}}
+        <button class="btn delete">Delete</button>
+      {{/if}}
+    {{/if}}
+  </div>
+</div>
+
+<style>
+  .container {
+    max-width: 900px;
+    margin: auto;
+    padding: 2rem;
+    font-family: Arial, sans-serif;
+    color: white;
+    background: radial-gradient(circle at top, #0b0c27, #1c1f4a);
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .review-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  .review-card h3 {
+    margin: 0 0 0.5rem 0;
+  }
+  .review-card p {
+    margin: 0;
+  }
+  .btn {
+    background: #6c63ff;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 1rem;
+  }
+  .btn.delete {
+    background: #ff4d6d;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
+  .btn.create {
+    display: block;
+    margin: 2rem auto;
+  }
+
+  /* Mock link styling */
+  .place-link,
+  .account-link {
+    text-decoration: underline;
+    cursor: pointer;
+    color: #ffffff;
+  }
+  .place-link:hover,
+  .account-link:hover {
+    color: #6c63ff;
+  }
+</style>
