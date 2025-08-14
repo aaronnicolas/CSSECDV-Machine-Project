@@ -41,7 +41,7 @@
         <li class="nav-item">
           <a class="nav-link" href="/user_dashboard">account</a>
         </li>
-
+        {{#unless currentUser}}
         <li class="nav-item">
           <a class="nav-link" href="/login">login</a>
         </li>
@@ -49,6 +49,7 @@
         <li class="nav-item">
           <a class="nav-link" href="/register">register</a>
         </li>
+        {{/unless}}
       </ul>
     </div>
   </div>

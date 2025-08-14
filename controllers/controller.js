@@ -188,7 +188,17 @@ const controller = {
         }
     },
 
+    
+    user_profile: async(req, res) => {
+        try {
+            res.render ('user_profile', {
 
+            })
+        }
+        catch (err) {
+            next(err)
+        }
+    },
 
     
 }

@@ -18,7 +18,7 @@ router.get (`/star_sentinel`, requireAuth, requireRole(1), controller.star_senti
 router.get (`/user_dashboard`, requireAuth, controller.user_dashboard) // PROTECTED
 router.get (`/changepassword`, requireAuth, controller.changepassword) // PROTECTED
 router.get (`/securityquestion`, requireAuth, controller.securityquestion) // PROTECTED
-
+router.get (`/user_profile`, requireAuth, controller.user_profile) // PROTECTED
 // POSTS
 router.post (`/login`,      authUtility.attemptAuth)            // PUBLIC
 router.post (`/register`,   authUtility.register)               // PUBLIC
