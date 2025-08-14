@@ -1,7 +1,7 @@
-import { Log } from './models/log.js';
+import { Log } from '../model/logSchema.js';
 import mongoose from 'mongoose';
 
-export async function logEvent({ event, desc, user, id }, next) {
+export async function logEvent({ event, desc, user, id }) {
     try {
         if (!id) {
             const lastLog = await Log.findOne().sort({ id: -1 });
@@ -17,6 +17,8 @@ export async function logEvent({ event, desc, user, id }, next) {
 
         return newLog;
     } catch (err) {
-        next('Error creating log:', err)
+        throw err
     }
 }
+
+export default logEvent

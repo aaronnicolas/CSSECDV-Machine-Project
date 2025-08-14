@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt'
 import passport from 'passport'
 import passwordValidator from '../utils/passwordValidator.js'
 import { User } from '../model/userSchema.js'
+import logEvent from '../utils/logger.js'
 
 // Helper function to record login attempt (current attempt only)
 async function recordLoginAttempt(user, successful, req) {
@@ -16,6 +17,12 @@ async function recordLoginAttempt(user, successful, req) {
         userAgent: (req.get('User-Agent') || 'Unknown').substring(0, 200),
         deviceInfo: deviceInfo
     };
+
+    await logEvent({event:`Login Attempt ${user.lastLoginAttempt.timestamp}`, 
+                    desc: JSON.stringify(user.lastLoginAttempt),
+                    user: user}
+                    // auto generate id through mongoose  
+                )
 
     await user.save();
 }
@@ -188,6 +195,7 @@ const authUtility = {
     },
 
     attemptAuth: async (req, res, next) => {
+    try {
     const { username, password, confirm_password } = req.body;
 
     if (!username || !password) {
@@ -226,6 +234,12 @@ const authUtility = {
                 user.failedLoginAttempts += 1;
 
                 if (user.failedLoginAttempts >= 5) {
+                    // log the max attempts and locking
+                    await logEvent({
+                        event: `MAX LOGIN LOCK ${Date.now()}`, 
+                        desc: JSON.stringify(user.lastLoginAttempt),
+                        user: user
+                    })
                     user.locked = true;
                     user.lockedUntil = new Date(Date.now() + 15 * 60000); // 15 minutes lock
                 }
@@ -255,6 +269,10 @@ const authUtility = {
         });
 
         })(req, res, next);
+        }
+        catch (err) {
+            next(err)
+        }
     },
 
     getRegister: async (req, res) => {
@@ -434,6 +452,7 @@ const authUtility = {
 
     } catch (err) {
         console.error('Change password error:', err);
+        // However, I won't use the middleware here because it calls a different handlebar
         res.status(500).render('changepassword', {
             error: 'An error occurred while changing password. Please try again.'
         });
@@ -443,12 +462,14 @@ const authUtility = {
     logout: (req, res, next) => {
         req.logout((err) => {
             if (err) { 
-                console.error('Logout error:', err);
+                //console.error('Logout error:', err);
+                // I'm commenting out these errors, because it should pass 
+                // to the middleware that redirects users to generic 500 page?
                 return next(err); 
             }
             req.session.destroy((err) => {
                 if (err) {
-                    console.error('Session destroy error:', err);
+                    //console.error('Session destroy error:', err);
                     return next(err);
                 }
                 res.redirect('/?message=Successfully logged out');

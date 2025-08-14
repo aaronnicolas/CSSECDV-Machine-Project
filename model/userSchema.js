@@ -16,10 +16,10 @@ const userSchema = new Schema({
         match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
         maxlength: 100
     },
-    role: {
+    role: { // 0 - user, 1 - mod, 2 - admin
         type: Number,
         min: 0,
-        max: 10
+        max: 2
     },
     locked: {
         type: Number,

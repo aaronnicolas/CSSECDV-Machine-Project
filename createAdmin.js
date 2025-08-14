@@ -1,12 +1,10 @@
-// createAdmin.js
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import bcrypt from "bcrypt";
+import mongoose from "mongoose"
+import dotenv from "dotenv"
+import bcrypt from "bcrypt"
+import { User } from "./model/userSchema.js"
 
-// Load env vars
-dotenv.config();
+dotenv.config()
 
-// Connect to DB
 const connectDB = async () => {
   try {
     console.log("Connecting to MongoDB at:", process.env.MONGO_URI);
@@ -19,43 +17,43 @@ const connectDB = async () => {
     console.error("MongoDB connection error:", err.message);
     process.exit(1);
   }
-};
+}
 
-// Define User model
-const userSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  role: { type: String, default: "user" },
-});
-
-const User = mongoose.model("User", userSchema);
-
-// Create admin account
 const createAdmin = async () => {
   try {
     await connectDB();
 
-    const username = "admin"; // change as needed
-    const plainPassword = "changeme"; // change as needed
-
-    // Hash password with 12 salt rounds
-    const hashedPassword = await bcrypt.hash(plainPassword, 12);
+    const username = "admin";
+    const email = "admin3@example.com";
+    const plainPassword = "admin"; // strong enough to pass validation
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(plainPassword, salt);
 
     const admin = new User({
       username,
+      email,
+      role: 2, // admin
+      locked: false,
       password: hashedPassword,
-      role: "admin",
-    });
+      salt,
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      securityQuestion1: "What is your favorite game?",
+      securityAnswerHash1: await bcrypt.hash("Zelda", salt),
+      securityQuestion2: "What is your favorite color?",
+      securityAnswerHash2: await bcrypt.hash("Blue", salt),
+      lastLoginAttempt: {},
+      previousLoginAttempt: {},
+    })
 
     await admin.save();
-    console.log(`Admin user "${username}" created successfully.`);
-
+    console.log(`Admin user "${username}" created successfully.`)
   } catch (err) {
-    console.error("Error creating admin:", err.message);
+    console.error("Error creating admin:", err.message)
   } finally {
-    await mongoose.disconnect();
-    process.exit(0);
+    await mongoose.disconnect()
+    process.exit(0)
   }
-};
+}
 
-createAdmin();
+createAdmin()

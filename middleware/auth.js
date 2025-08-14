@@ -1,4 +1,6 @@
+import logEvent from "../utils/logger";
 // Authentication middleware to require login
+
 const requireAuth = (req, res, next) => {
     if (req.isAuthenticated()) {
         return next();
@@ -10,6 +12,8 @@ const requireAuth = (req, res, next) => {
 const requireRole = (minRole) => {
     return (req, res, next) => {
         if (!req.isAuthenticated()) {
+            logEvent({ event: 'Access Denied', desc: 'Insufficient permissions', user: null });
+
             return res.redirect('/login?feedback=Please log in to access this page');
         }
         
