@@ -1,53 +1,61 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
-const Schema = mongoose.Schema
+const Schema = mongoose.Schema;
 
-/***
- * What would we like the user to be able to identify and do?
- * 
- * We want the user to..
- */
-
-const userSchema = new Schema ({
-    username: String,       // have a name
+const userSchema = new Schema({
+    username: {
+        type: String,
+        required: true,
+        minlength: 3,
+        maxlength: 30
+    },
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        maxlength: 100
     },
-    role: Number,          // role identifier for certain access
-    locked: Number,        // locking users for a certain amount of time? maybe this should be a clock idk
-    
+    role: {
+        type: Number,
+        min: 0,
+        max: 10
+    },
+    locked: {
+        type: Number,
+        min: 0,
+        max: 1
+    },
     dateCreated: {
         type: Date,
         default: Date.now
     },
-    
     password: {
         type: String,
-        required: true
+        required: true,
+        minlength: 8
     },
-
     passwordChangedAt: {
         type: Date,
         default: Date.now
     },
-
     salt: {
         type: String,
         required: true
     },
-    failedLoginAttempts: { 
-        type: Number, 
-        default: 0 
+    failedLoginAttempts: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 10
     },
-    lockedUntil: { 
-        type: Date, 
-        default: null 
+    lockedUntil: {
+        type: Date,
+        default: null
     },
-    locked: { 
-        type: Boolean, 
-        default: false 
+    locked: {
+        type: Boolean,
+        default: false
     },
     securityQuestion1: {
         type: String,
@@ -67,7 +75,6 @@ const userSchema = new Schema ({
         type: String,
         required: true
     },
-
     lastLoginAttempt: {
         timestamp: {
             type: Date,
@@ -79,24 +86,29 @@ const userSchema = new Schema ({
         },
         ipAddress: {
             type: String,
-            default: null
+            default: null,
+            maxlength: 45 // IPv6 max length
         },
         userAgent: {
             type: String,
-            default: null
+            default: null,
+            maxlength: 255
         },
         deviceInfo: {
             browser: {
                 type: String,
-                default: null
+                default: null,
+                maxlength: 50
             },
             os: {
                 type: String,
-                default: null
+                default: null,
+                maxlength: 50
             },
             deviceType: {
                 type: String,
-                default: null
+                default: null,
+                maxlength: 50
             },
             isMobile: {
                 type: Boolean,
@@ -104,7 +116,6 @@ const userSchema = new Schema ({
             }
         }
     },
-
     previousLoginAttempt: {
         timestamp: {
             type: Date,
@@ -116,24 +127,29 @@ const userSchema = new Schema ({
         },
         ipAddress: {
             type: String,
-            default: null
+            default: null,
+            maxlength: 45
         },
         userAgent: {
             type: String,
-            default: null
+            default: null,
+            maxlength: 255
         },
         deviceInfo: {
             browser: {
                 type: String,
-                default: null
+                default: null,
+                maxlength: 50
             },
             os: {
                 type: String,
-                default: null
+                default: null,
+                maxlength: 50
             },
             deviceType: {
                 type: String,
-                default: null
+                default: null,
+                maxlength: 50
             },
             isMobile: {
                 type: Boolean,
@@ -141,6 +157,6 @@ const userSchema = new Schema ({
             }
         }
     }
-})
+});
 
-export const User = mongoose.model('User', userSchema)
+export const User = mongoose.model('User', userSchema);
