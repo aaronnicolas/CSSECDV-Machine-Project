@@ -64,7 +64,7 @@ const controller = {
                     description: 'Add, edit, or remove users from the star system.',
                     total: '1,024 users', 
                     growth: 8,
-                    link: '/admin/users',
+                    link: '/star_admin/users',
                     labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
                     data: [120, 135, 150, 140, 160, 175, 190] // chart data
                     },
@@ -73,16 +73,16 @@ const controller = {
                     description: 'Review and moderate other observation logs from Moderators and Regulars',
                     total: '312 observations', 
                     growth: -3, 
-                    link: '/admin/observations',
+                    link: '/star_admin/observations',
                     labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
                     data: [45, 40, 38, 35, 50, 47, 57]
                     },
                     {
-                    title: 'Analytics', 
+                    title: 'Analytics / Logs', 
                     description: 'View site traffic and trends.',
                     total: '12.3k visits',
                     growth: 15,
-                    link: '/admin/analytics',
+                    link: '/star_admin/analytics',
                     labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
                     data: [1800, 2100, 1950, 2200, 2500, 2700, 3100]
                     }
@@ -209,6 +209,16 @@ const controller = {
             next(err)
         }
     },
+    analytics: async(req, res) => {
+        try{
+            res.render ('star_admin', {
+                layout: "admin"
+            })
+        }
+        catch (err) {
+            next (err)
+        }
+    }
     
 }
 

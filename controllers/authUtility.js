@@ -302,6 +302,13 @@ const authUtility = {
 
         // Check required fields
         if (!username || !email || !password || !securityAnswer1 || !securityAnswer2) {
+
+            await logEvent({event:`Incomplete Fields ${Date.now()}`, 
+                desc: `${username} ${email} Registration failed`,
+                user: null}
+                // auto generate id through mongoose  
+            )
+
             return res.status(400).render('register', {
                 error: 'All fields are required!'
             });
@@ -309,6 +316,12 @@ const authUtility = {
 
         // Check password confirmation
         if (confirm_password && password !== confirm_password) {
+            await logEvent({event:`Passwords do not match ${Date.now()}`, 
+                desc: `${username} ${email} attempt registration, failed`,
+                user: null}
+                // auto generate id through mongoose  
+            )
+
             return res.status(400).render('register', {
                 error: 'Passwords do not match!'
             });
@@ -317,6 +330,12 @@ const authUtility = {
         // Validate password complexity
         const passwordValidation = passwordValidator.validate(password);
         if (!passwordValidation.isValid) {
+            await logEvent({event:`Password not complex enough ${Date.now()}`, 
+                desc: `${username} ${email} attempt registration, failed`,
+                user: null}
+                // auto generate id through mongoose  
+            )
+
             return res.status(400).render('register', {
                 error: passwordValidation.errors.join(', ')
             });
@@ -328,6 +347,12 @@ const authUtility = {
         });
         
         if (existingUser) {
+            await logEvent({event:`User already exists ${Date.now()}`, 
+                desc: `${username} ${email} attempt registration, failed`,
+                user: null}
+                // auto generate id through mongoose  
+            )
+
             return res.status(400).render('register', {
                 error: 'Username or email already exists!'
             });

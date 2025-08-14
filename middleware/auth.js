@@ -1,4 +1,4 @@
-import logEvent from "../utils/logger";
+import logEvent from "../utils/logger.js";
 // Authentication middleware to require login
 
 const requireAuth = (req, res, next) => {

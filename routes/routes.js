@@ -20,6 +20,8 @@ router.get (`/changepassword`, requireAuth, controller.changepassword) // PROTEC
 router.get (`/securityquestion`, requireAuth, controller.securityquestion) // PROTECTED
 router.get (`/user_profile`, requireAuth, controller.user_profile) // PROTECTED
 router.get (`/galaxies`, requireAuth, controller.galaxies) // PROTECTED
+router.get('/star_admin/analytics', requireRole(2), controller.analytics);
+
 // POSTS
 router.post (`/login`,      authUtility.attemptAuth)            // PUBLIC
 router.post (`/register`,   authUtility.register)               // PUBLIC
